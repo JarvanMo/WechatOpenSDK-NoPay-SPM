@@ -70,11 +70,30 @@ Package.swift
 WechatOpenSDK-NoPay.xcframework - 腾讯官方提供的原始 SDK，无任何修改
 WechatOpenSDK-NoPay-Dynamic.xcframework - 由脚本生成的 dynamic 产物，SwiftPM 实际使用它。
 scripts/build_dynamic_xcframework.sh - 重新生成 dynamic xcframework 的脚本。
+scripts/update_sdk.sh - 一键更新 SDK：下载、替换、重新生成 dynamic 产物、提交、打 tag 并推送。
 ```
+
+## 更新 SDK
+
+腾讯发布新版本后，在仓库根目录运行：
+
+```sh
+./scripts/update_sdk.sh 2.0.8
+```
+
+脚本会依次：
+
+1. 检查本地 `main` 是否落后于远端（落后则退出，需先 `git pull --rebase`），以及该版本的 tag 是否已存在（存在则退出）
+2. 从 `https://dldir1.qq.com/WechatWebDev/opensdk/XCFramework/OpenSDK<版本号>_NoPay.zip` 下载 SDK
+3. 解压并替换 `WechatOpenSDK-NoPay.xcframework`，删除 zip 和 `.DS_Store`
+4. 运行 `scripts/build_dynamic_xcframework.sh` 重新生成 `WechatOpenSDK-NoPay-Dynamic.xcframework`
+5. 提交 `bump framework to <版本号>`，打 tag `<版本号>`，并把 `main` 和 tag 一起推送（`--atomic`）
+
+如果下载的 framework 与仓库中完全一致，脚本不会提交，也不会打 tag。更新完成后，建议按下一节第 3 步检查生成产物。
 
 ## 如何重新生成 Dynamic XCFramework
 
-如果腾讯官方更新了 WechatOpenSDK-NoPay：
+如果需要手动更新 WechatOpenSDK-NoPay（`scripts/update_sdk.sh` 已自动完成以下第 1、2 步）：
 
 1. 替换仓库中的原始 SDK：
 
